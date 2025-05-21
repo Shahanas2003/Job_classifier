@@ -66,9 +66,9 @@ def classify_new_jobs(df):
 def job_task():
     print("🔍 Scraping job data...")
     df = scrape_karkidi_jobs(keyword="data science", pages=1)
-    print(f"✅ Scraped {len(df)} jobs.")
+    print(f" Scraped {len(df)} jobs.")
 
-    print("🧠 Classifying jobs...")
+    print(" Classifying jobs...")
     df = classify_new_jobs(df)
 
     df.to_csv("daily_jobs_classified.csv", index=False)
