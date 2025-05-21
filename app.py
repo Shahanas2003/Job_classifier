@@ -7,8 +7,8 @@ from bs4 import BeautifulSoup
 import time
 
 # Load models once
-kmeans = load("models/kmeans_model.joblib")
-vectorizer = load("models/tfidf_vectorizer.joblib")
+kmeans = load("kmeans_model.joblib")
+vectorizer = load("tfidf_vectorizer.joblib")
 
 def clean_skills(skills):
     if pd.isna(skills):
