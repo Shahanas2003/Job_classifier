@@ -77,3 +77,11 @@ def job_task():
 # Run once
 if __name__ == "__main__":
     job_task()
+# At the end of job_automation.py
+
+def run_automation():
+    job_task()
+
+if __name__ == "__main__":
+    run_automation()
+
