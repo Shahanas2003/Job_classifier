@@ -84,4 +84,9 @@ def run_automation():
 
 if __name__ == "__main__":
     run_automation()
+def run_automation(keyword="data science", pages=1):
+    df = scrape_karkidi_jobs(keyword, pages)
+    df = classify_new_jobs(df)
+    df.to_csv("daily_jobs_classified.csv", index=False)
+
 
