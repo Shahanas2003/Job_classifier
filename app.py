@@ -5,6 +5,8 @@ import re
 import requests
 from bs4 import BeautifulSoup
 import time
+from job_automation import run_automation
+
 
 # Load models once
 kmeans = load("kmeans_model.joblib")
