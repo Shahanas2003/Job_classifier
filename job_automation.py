@@ -77,16 +77,4 @@ def job_task():
 # Run once
 if __name__ == "__main__":
     job_task()
-# At the end of job_automation.py
-
-def run_automation():
-    job_task()
-
-if __name__ == "__main__":
-    run_automation()
-def run_automation(keyword="data science", pages=1):
-    df = scrape_karkidi_jobs(keyword, pages)
-    df = classify_new_jobs(df)
-    df.to_csv("daily_jobs_classified.csv", index=False)
-
 
