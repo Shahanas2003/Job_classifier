@@ -5,4 +5,3 @@ joblib
 beautifulsoup4
 requests
 numpy
-job_automation
