@@ -6,11 +6,11 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-
-# Load models once
+# --- Load models once ---
 kmeans = load("kmeans_model.joblib")
 vectorizer = load("tfidf_vectorizer.joblib")
 
+# --- Clean Skills Function ---
 def clean_skills(skills):
     if pd.isna(skills):
         return ""
@@ -19,7 +19,7 @@ def clean_skills(skills):
     skills = [skill.strip() for skill in skills.split(",") if skill.strip()]
     return " ".join(skills)
 
-# Use your existing scraper logic (simplified here)
+# --- Scraper Function ---
 def scrape_karkidi_jobs(keyword="data science", pages=1):
     headers = {'User-Agent': 'Mozilla/5.0'}
     base_url = "https://www.karkidi.com/Find-Jobs/{page}/all/India?search={query}"
@@ -55,12 +55,14 @@ def scrape_karkidi_jobs(keyword="data science", pages=1):
 
     return pd.DataFrame(jobs_list)
 
+# --- Classifier Function ---
 def classify_new_jobs(df_new_jobs):
     df_new_jobs["Cleaned_Skills"] = df_new_jobs["Skills"].apply(clean_skills)
     X_new = vectorizer.transform(df_new_jobs["Cleaned_Skills"])
     df_new_jobs["Predicted_Cluster"] = kmeans.predict(X_new)
     return df_new_jobs
 
+# --- Notifier Function ---
 def notify_user(df_new_jobs, preferred_cluster):
     matched_jobs = df_new_jobs[df_new_jobs["Predicted_Cluster"] == preferred_cluster]
     if not matched_jobs.empty:
@@ -68,7 +70,7 @@ def notify_user(df_new_jobs, preferred_cluster):
     else:
         return pd.DataFrame()
 
-# --- Streamlit UI ---
+# --- Streamlit App ---
 st.title("Job Posting Classifier and Notifier")
 
 keyword = st.text_input("Enter skill keyword(s) to search jobs:", "data science")
@@ -81,11 +83,18 @@ if st.button("Scrape and Classify Jobs"):
     with st.spinner("Classifying jobs..."):
         df_classified = classify_new_jobs(df_jobs)
 
+    # Debug: Show predicted clusters and model info
+    st.write("✅ Unique clusters predicted:", df_classified["Predicted_Cluster"].unique())
+    st.write("🤖 Model was trained with", kmeans.n_clusters, "clusters")
+    st.dataframe(df_classified[["Skills", "Cleaned_Skills", "Predicted_Cluster"]])
+
     st.success(f"Found {len(df_classified)} jobs and classified into clusters.")
 
+    # Cluster selection
     cluster_options = df_classified["Predicted_Cluster"].unique().tolist()
     preferred_cluster = st.selectbox("Select your preferred cluster:", cluster_options)
 
+    # Show matched jobs
     matched_jobs = notify_user(df_classified, preferred_cluster)
 
     if not matched_jobs.empty:
