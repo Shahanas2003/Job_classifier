@@ -76,6 +76,7 @@ st.title("Job Posting Classifier and Notifier")
 keyword = st.text_input("Enter skill keyword(s) to search jobs:", "data science")
 pages = st.slider("Number of pages to scrape:", 1, 5, 1)
 
+# Button to scrape and classify
 if st.button("Scrape and Classify Jobs"):
     with st.spinner("Scraping jobs..."):
         df_jobs = scrape_karkidi_jobs(keyword, pages)
@@ -83,18 +84,24 @@ if st.button("Scrape and Classify Jobs"):
     with st.spinner("Classifying jobs..."):
         df_classified = classify_new_jobs(df_jobs)
 
-    # Debug: Show predicted clusters and model info
-    st.write("✅ Unique clusters predicted:", df_classified["Predicted_Cluster"].unique())
+    # Store results in session_state
+    st.session_state["df_classified"] = df_classified
+    st.session_state["clusters"] = sorted(df_classified["Predicted_Cluster"].unique().tolist())
+
+# Only show these if we have job data in session
+if "df_classified" in st.session_state:
+    df_classified = st.session_state["df_classified"]
+    cluster_options = st.session_state["clusters"]
+
+    st.write("✅ Unique clusters predicted:", cluster_options)
     st.write("🤖 Model was trained with", kmeans.n_clusters, "clusters")
     st.dataframe(df_classified[["Skills", "Cleaned_Skills", "Predicted_Cluster"]])
 
     st.success(f"Found {len(df_classified)} jobs and classified into clusters.")
 
-    # Cluster selection
-    cluster_options = df_classified["Predicted_Cluster"].unique().tolist()
+    # Cluster selector
     preferred_cluster = st.selectbox("Select your preferred cluster:", cluster_options)
 
-    # Show matched jobs
     matched_jobs = notify_user(df_classified, preferred_cluster)
 
     if not matched_jobs.empty:
@@ -102,4 +109,6 @@ if st.button("Scrape and Classify Jobs"):
         for idx, row in matched_jobs.iterrows():
             st.write(f"**{row['Title']}** at *{row['Company']}*")
     else:
-        st.write(f"No new jobs found in Cluster {preferred_cluster}.")
+        st.warning(f"No new jobs found in Cluster {preferred_cluster}.")
+else:
+    st.info("Click 'Scrape and Classify Jobs' to start.")
